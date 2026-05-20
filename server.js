@@ -170,7 +170,8 @@ const ReportSchema = new mongoose.Schema({
   reportedBy: { type: String }
 });
 
-let User, Report;
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
+const Report = mongoose.models.Report || mongoose.model('Report', ReportSchema);
 
 // Connect to MongoDB with timeout handling
 if (!MONGODB_URI) {
@@ -183,8 +184,6 @@ if (!MONGODB_URI) {
   })
   .then(() => {
     console.log("🚀 Successful Connection to MongoDB!");
-    User = mongoose.model('User', UserSchema);
-    Report = mongoose.model('Report', ReportSchema);
     seedDatabase();
   })
   .catch((err) => {
