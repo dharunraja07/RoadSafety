@@ -1,0 +1,110 @@
+[
+  {
+    "id": "SR-9041",
+    "type": "Pothole",
+    "severity": "85%",
+    "coords": [13.0822, 80.2755],
+    "landmark": "Near Chennai Central Metro Station, Chennai",
+    "status": "pending",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-3304",
+    "type": "Waterlogging",
+    "severity": "60%",
+    "coords": [13.0425, 80.2560],
+    "landmark": "Opposite Express Avenue Mall, Mount Road, Chennai",
+    "status": "assigned",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-1102",
+    "type": "Broken Signal",
+    "severity": "95%",
+    "coords": [13.0067, 80.2206],
+    "landmark": "Kathipara Junction Roundabout, Guindy, Chennai",
+    "status": "resolved",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-7730",
+    "type": "Pothole",
+    "severity": "78%",
+    "coords": [11.0242, 76.9944],
+    "landmark": "Avinashi Road near Hope College Flyover, Coimbatore",
+    "status": "pending",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-7731",
+    "type": "Road Crack",
+    "severity": "45%",
+    "coords": [11.0181, 76.9634],
+    "landmark": "Gandhipuram Signal Crossing, Coimbatore",
+    "status": "assigned",
+    "visual": "crack1"
+  },
+  {
+    "id": "SR-5520",
+    "type": "Pothole",
+    "severity": "92%",
+    "coords": [9.9205, 78.1132],
+    "landmark": "West Veli Street near Madurai Junction, Madurai",
+    "status": "pending",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-5521",
+    "type": "Waterlogging",
+    "severity": "70%",
+    "coords": [9.9320, 78.0955],
+    "landmark": "Kalavasal Junction, Theni Road, Madurai",
+    "status": "pending",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-4410",
+    "type": "Pothole",
+    "severity": "88%",
+    "coords": [10.8062, 78.6872],
+    "landmark": "Thillai Nagar Main Road near 10th Cross, Trichy",
+    "status": "pending",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-4411",
+    "type": "Broken Signal",
+    "severity": "80%",
+    "coords": [10.7854, 78.6980],
+    "landmark": "Cantonment Road near Central Bus Stand, Trichy",
+    "status": "assigned",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-3310",
+    "type": "Pothole",
+    "severity": "64%",
+    "coords": [11.6738, 78.1275],
+    "landmark": "Five Roads Junction, Salem",
+    "status": "pending",
+    "visual": "pothole1"
+  },
+  {
+    "id": "SR-3311",
+    "type": "Road Crack",
+    "severity": "52%",
+    "coords": [11.6610, 78.1522],
+    "landmark": "Salem Junction Road near New Bus Stand, Salem",
+    "status": "resolved",
+    "visual": "crack1"
+  },
+  {
+    "id": "SR-2210",
+    "type": "Pothole",
+    "severity": "82%",
+    "coords": [8.7285, 77.7490],
+    "landmark": "Vannarpettai Bypass Road, Tirunelveli",
+    "status": "pending",
+    "visual": "pothole1"
+  }
+]

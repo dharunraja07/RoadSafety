@@ -1,0 +1,16 @@
+[
+  {
+    "username": "admin",
+    "password": "$2b$10$T4iT7ozxbWlMFsG3xHdNnO9gVoZ2acrqqzpaVi0oINXbHn4JxOwle",
+    "role": "admin",
+    "safetyScore": 100,
+    "rewardPoints": 1000
+  },
+  {
+    "username": "dharun",
+    "password": "$2b$10$jyBEoHaGw/0xJ3ULH11ed.9TF1b5EmX/G03A1.BZTsJmmMPOMqoEa",
+    "role": "citizen",
+    "safetyScore": 85,
+    "rewardPoints": 720
+  }
+]
