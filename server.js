@@ -173,20 +173,26 @@ const ReportSchema = new mongoose.Schema({
 let User, Report;
 
 // Connect to MongoDB with timeout handling
-mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 4000 // 4 seconds timeout
-})
-.then(() => {
-  console.log("🚀 Successful Connection to MongoDB!");
-  User = mongoose.model('User', UserSchema);
-  Report = mongoose.model('Report', ReportSchema);
-  seedDatabase();
-})
-.catch((err) => {
-  console.error("⚠️ MongoDB connection failed. Entering Resilient Offline Fallback Mode:", err.message);
+if (!MONGODB_URI) {
+  console.warn("⚠️ MONGODB_URI environment variable is missing. Entering Resilient Offline Fallback Mode.");
   isUsingFallback = true;
   setupFallbackModels();
-});
+} else {
+  mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 4000 // 4 seconds timeout
+  })
+  .then(() => {
+    console.log("🚀 Successful Connection to MongoDB!");
+    User = mongoose.model('User', UserSchema);
+    Report = mongoose.model('Report', ReportSchema);
+    seedDatabase();
+  })
+  .catch((err) => {
+    console.error("⚠️ MongoDB connection failed. Entering Resilient Offline Fallback Mode:", err.message);
+    isUsingFallback = true;
+    setupFallbackModels();
+  });
+}
 
 // Setup mock DB functions if Atlas/Local Mongo is offline
 function setupFallbackModels() {
