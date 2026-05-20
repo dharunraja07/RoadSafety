@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeRoad AI - Smart Road Safety Ecosystem</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Background Animated Elements -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Main Container -->
+  <div class="app-layout">
+    
+    <!-- Top HUD Navigation Bar -->
+    <header class="app-header">
+      <div class="header-logo">
+        <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="logo-text">
+          <h1>SAFEROAD <span class="accent-text">AI</span></h1>
+          <span class="sub-logo">Smart Safety & Civic Response</span>
+        </div>
+      </div>
+      
+      <div class="header-status-bar">
+        <div class="status-item">
+          <span class="status-dot green-glow"></span>
+          <span class="status-label">AI Core: Online</span>
+        </div>
+        <div class="status-item">
+          <span class="status-dot pulse-blue"></span>
+          <span class="status-label">GPS Sync: Active</span>
+        </div>
+        <!-- Toggle button visible only on mobile/tablet to switch between App and Admin -->
+        <button id="view-toggle-btn" class="view-toggle-btn">
+          <i class="fa-solid fa-laptop-code"></i> Switch to Admin
+        </button>
+      </div>
+    </header>
+
+    <!-- Split-Screen Workspace -->
+    <main class="workspace">
+      
+      <!-- LEFT PANE: Mobile App Emulator -->
+      <section class="left-pane" id="citizen-app-pane">
+        <div class="phone-chassis">
+          <!-- Notch & Phone Speaker -->
+          <div class="phone-notch">
+            <div class="phone-camera"></div>
+            <div class="phone-speaker"></div>
+          </div>
+          
+          <!-- Screen Wrapper -->
+          <div class="phone-screen">
+            
+            <!-- Mobile App Status Bar -->
+            <div class="phone-status-bar">
+              <span class="status-time" id="live-phone-time">20:45</span>
+              <div class="status-icons">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-three-quarters"></i>
+              </div>
+            </div>
+
+            <!-- Citizen App Auth Overlay -->
+            <div id="citizen-auth-overlay" class="phone-auth-overlay">
+              <div class="auth-card glass-card">
+                <div class="auth-header">
+                  <div class="auth-logo"><i class="fa-solid fa-shield-halved text-cyan"></i></div>
+                  <h3>SAFEROAD <span class="accent-text">AI</span></h3>
+                  <span>Citizen Protection Portal</span>
+                </div>
+                
+                <div id="citizen-login-form" class="auth-form">
+                  <div class="auth-input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="citizen-username" placeholder="Username (e.g. dharun)">
+                  </div>
+                  <div class="auth-input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="citizen-password" placeholder="Password (e.g. 123)">
+                  </div>
+                  <button class="auth-submit-btn" onclick="handleCitizenLogin()">
+                    <i class="fa-solid fa-right-to-bracket"></i> Unlock App
+                  </button>
+                  <p class="auth-toggle-text">New citizen? <a href="#" onclick="toggleCitizenAuthMode(true)">Sign Up</a></p>
+                </div>
+
+                <div id="citizen-register-form" class="auth-form hidden">
+                  <div class="auth-input-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="citizen-reg-username" placeholder="Choose Username">
+                  </div>
+                  <div class="auth-input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="citizen-reg-password" placeholder="Choose Password">
+                  </div>
+                  <button class="auth-submit-btn" onclick="handleCitizenRegister()">
+                    <i class="fa-solid fa-user-plus"></i> Register & Login
+                  </button>
+                  <p class="auth-toggle-text">Have an account? <a href="#" onclick="toggleCitizenAuthMode(false)">Log In</a></p>
+                </div>
+
+                <div class="demo-login-box">
+                  <span>Fast Demo Login:</span>
+                  <button class="demo-chip" onclick="quickFillCitizen('dharun', '123')">dharun / 123</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- MOBILE APP CONTENT (Dynamic Views) -->
+            <div class="phone-content-area" id="phone-view-container" style="display: none;">
+
+              <!-- VIEW 1: HOME SCREEN -->
+              <div class="phone-view active-view" id="view-home">
+                
+                <!-- Quick Weather & Location Header -->
+                <div class="weather-location-widget">
+                  <div class="loc-info" onclick="requestLiveLocation()" style="cursor: pointer;">
+                    <i class="fa-solid fa-location-dot location-ping"></i>
+                    <div>
+                      <h4 id="user-location-text">Marina Beach, Chennai</h4>
+                      <span>Live GPS Tracking</span>
+                    </div>
+                  </div>
+                  <div class="weather-info">
+                    <i class="fa-solid fa-cloud-sun weather-icon" id="weather-icon"></i>
+                    <div>
+                      <h4 id="weather-temp">32°C</h4>
+                      <span id="weather-aqi">PM 2.5: 42</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Safety Score Radial Gauge -->
+                <div class="safety-score-card glass-card">
+                  <div class="safety-gauge-wrapper">
+                    <svg viewBox="0 0 100 100" class="gauge-svg">
+                      <circle cx="50" cy="50" r="40" class="gauge-bg" />
+                      <circle cx="50" cy="50" r="40" class="gauge-progress" id="home-gauge-progress" />
+                    </svg>
+                    <div class="gauge-center">
+                      <span class="score-value" id="home-score-value">85</span>
+                      <span class="score-label">Safe Drive</span>
+                    </div>
+                  </div>
+                  <div class="safety-score-info">
+                    <h3>Your Driver Score</h3>
+                    <p class="score-rating rating-good"><i class="fa-solid fa-circle-check"></i> Excellent Road Rating</p>
+                    <p class="score-details">Maintain helmet/seatbelt protocols to increase your rating and get premium discount coupons.</p>
+                  </div>
+                </div>
+
+                <!-- Traffic Alert Banner -->
+                <div class="traffic-ticker-banner alert-yellow">
+                  <div class="ticker-label"><i class="fa-solid fa-triangle-exclamation"></i> LIVE ALERT</div>
+                  <div class="ticker-wrapper">
+                    <div class="ticker-content" id="ticker-alert-text">
+                      High traffic density detected on Anna Salai (Mount Road) • Waterlogging reported near Kathipara Flyover - drive carefully! • AI Risk prediction active.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section Heading -->
+                <div class="section-title">
+                  <h3>Safety Modules</h3>
+                  <span>AI-Powered Modules</span>
+                </div>
+
+                <!-- Grid of Module Buttons -->
+                <div class="modules-grid">
+                  
+                  <!-- Card 1: DriveLegal -->
+                  <div class="module-card card-drivelegal glass-card" onclick="switchPhoneView('drivelegal')">
+                    <div class="card-icon-wrapper cyan-glow">
+                      <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <div class="card-meta">
+                      <h4>DriveLegal</h4>
+                      <p>Traffic rules, direct fine calculators, and AI legal assistant.</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-btn"></i>
+                  </div>
+
+                  <!-- Card 2: RoadWatch -->
+                  <div class="module-card card-roadwatch glass-card" onclick="switchPhoneView('roadwatch')">
+                    <div class="card-icon-wrapper yellow-glow">
+                      <i class="fa-solid fa-road-spikes"></i>
+                    </div>
+                    <div class="card-meta">
+                      <h4>RoadWatch</h4>
+                      <p>Visual AI road defect scanner, active hazard logs, & reporting.</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-btn"></i>
+                  </div>
+
+                  <!-- Card 3: RoadSoS -->
+                  <div class="module-card card-roadsos glass-card" onclick="switchPhoneView('roadsos')">
+                    <div class="card-icon-wrapper red-glow">
+                      <i class="fa-solid fa-kit-medical"></i>
+                    </div>
+                    <div class="card-meta">
+                      <h4>RoadSoS</h4>
+                      <p>Emergency medical rescue, impact simulator, & alert timers.</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-btn"></i>
+                  </div>
+
+                </div>
+
+                <!-- Hackathon AI Systems Overview Mini-widget -->
+                <div class="mini-ai-systems-list glass-card">
+                  <div class="ai-header">
+                    <i class="fa-solid fa-microchip ai-chip-pulse"></i>
+                    <h4>Active Intelligent Co-Pilots</h4>
+                  </div>
+                  <div class="ai-tags">
+                    <span class="ai-tag"><i class="fa-solid fa-brain"></i> Gemini Legal Bot</span>
+                    <span class="ai-tag"><i class="fa-solid fa-eye"></i> Pothole AI (Vision)</span>
+                    <span class="ai-tag"><i class="fa-solid fa-gauge"></i> Impact G-Detect</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- VIEW 2: DRIVELEGAL (AI Legal Assistant) -->
+              <div class="phone-view" id="view-drivelegal">
+                <div class="view-header">
+                  <button class="back-to-home-btn" onclick="switchPhoneView('home')"><i class="fa-solid fa-arrow-left"></i></button>
+                  <h3>DriveLegal AI</h3>
+                  <div class="ai-avatar-pulse-container">
+                    <div class="ai-avatar-ring"></div>
+                    <div class="ai-avatar-dot"></div>
+                  </div>
+                </div>
+
+                <!-- Chat Display Window -->
+                <div class="chat-container" id="chat-messages-box">
+                  <div class="chat-message system-msg">
+                  </div>
+                </div>
+
+                <!-- Suggested Query Chips -->
+                <div class="chat-chips-scroll">
+                  <button class="chat-chip" onclick="sendSuggestedChat('No Helmet Penalty')"> Helmet Fine</button>
+                  <button class="chat-chip" onclick="sendSuggestedChat('Speed Limits Chennai')"> Speed Limit</button>
+                  <button class="chat-chip" onclick="sendSuggestedChat('License Rules 2026')"> License Rules</button>
+                  <button class="chat-chip" onclick="sendSuggestedChat('Drunk Driving Punishment')"> Drunk Driving</button>
+                </div>
+
+                <!-- Input Box Panel -->
+                <div class="chat-input-panel glass-card">
+                  <button class="mic-btn glow-pulse-blue" id="voice-input-simulator" title="Voice Input Simulation">
+                    <i class="fa-solid fa-microphone"></i>
+                  </button>
+                  <input type="text" id="chat-user-input" placeholder="Ask traffic laws or fines..." onkeydown="if(event.key === 'Enter') handleChatInputSubmit()">
+                  <button class="send-chat-btn" onclick="handleChatInputSubmit()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                  </button>
+                </div>
+
+                <!-- AI Voice Waveform overlay (hidden by default) -->
+                <div class="voice-waveform-overlay hidden" id="voice-wave-container">
+                  <div class="voice-wave-box">
+                    <div class="sound-wave">
+                      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <p id="voice-status-text">Listening for speech...</p>
+                    <button class="voice-close-btn" onclick="toggleVoiceSimulation(false)">Cancel</button>
+                  </div>
+                </div>
+
+                <!-- Fine Calculator Collapsible Widget -->
+                <div class="fine-calculator-widget glass-card">
+                  <div class="widget-header" onclick="toggleFineCalcCollapse()">
+                    <h4><i class="fa-solid fa-calculator"></i> Indian Fine Estimator</h4>
+                    <i class="fa-solid fa-chevron-down calc-arrow"></i>
+                  </div>
+                  <div class="widget-content hidden" id="fine-calc-body">
+                    <div class="calc-form">
+                      <div class="form-group">
+                        <label>Select State</label>
+                        <select id="calc-state">
+                          <option value="TamilNadu" selected>Tamil Nadu</option>
+                          <option value="Delhi">Delhi NCT</option>
+                          <option value="Maharashtra">Maharashtra</option>
+                          <option value="Karnataka">Karnataka</option>
+                          <option value="UttarPradesh">Uttar Pradesh</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Violation Category</label>
+                        <select id="calc-offense" onchange="updateCalcPreview()">
+                          <option value="helmet">Riding without Helmet</option>
+                          <option value="speeding">Over-speeding (LMV)</option>
+                          <option value="seatbelt">Driving without Seatbelt</option>
+                          <option value="redlight">Jumping Red Light</option>
+                          <option value="drunk">Drunk Driving (First Offense)</option>
+                        </select>
+                      </div>
+                      <div class="calc-result-box">
+                        <div class="result-label">Estimated Fine:</div>
+                        <div class="result-value" id="calc-fine-amount">₹1,000</div>
+                        <div class="result-details" id="calc-fine-law">Section 177 / 194D of MVA</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- VIEW 3: ROADWATCH (Pothole & Report) -->
+              <div class="phone-view" id="view-roadwatch">
+                <div class="view-header">
+                  <button class="back-to-home-btn" onclick="switchPhoneView('home')"><i class="fa-solid fa-arrow-left"></i></button>
+                  <h3>RoadWatch Scanner</h3>
+                  <span class="live-marker-dot yellow-glow"></span>
+                </div>
+
+                <div class="roadwatch-scroll-area">
+                  <!-- Embed Map widget inside App -->
+                  <div class="app-map-container glass-card">
+                    <div class="app-map-header">
+                      <span><i class="fa-solid fa-map-location-dot"></i> Citizen Hazard View</span>
+                      <span class="map-coordinates" id="phone-gps-coords">28.6139, 77.2090</span>
+                    </div>
+                    <div id="phone-leaflet-map" style="height: 140px; width: 100%;"></div>
+                  </div>
+
+                  <!-- Statistics Overview Row -->
+                  <div class="roadwatch-stats-row">
+                    <div class="rw-stat-card glass-card">
+                      <span class="rw-stat-num text-amber" id="stat-reported-num">124</span>
+                      <span class="rw-stat-lbl">Hazards Logged</span>
+                    </div>
+                    <div class="rw-stat-card glass-card">
+                      <span class="rw-stat-num text-green" id="stat-resolved-num">87</span>
+                      <span class="rw-stat-lbl">Repairs Resolved</span>
+                    </div>
+                  </div>
+
+                  <!-- Upload Report Section -->
+                  <div class="upload-section-card glass-card">
+                    <h3><i class="fa-solid fa-camera-retro"></i> AI Road Damage Detector</h3>
+                    <p class="section-subtitle">Select or upload a road damage photo for instant computer vision classification & logging.</p>
+
+                    <!-- Dropzone -->
+                    <div class="photo-dropzone" id="pothole-photo-dropzone">
+                      <div class="dz-prompt" id="dz-prompt-view">
+                        <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                        <h4>Upload Damage Image</h4>
+                        <p>JPEG or PNG up to 5MB</p>
+                        <div class="dz-presets">
+                          <p>Or select a preset mock road:</p>
+                          <div class="preset-buttons">
+                            <button class="preset-btn" onclick="loadPresetImage('pothole1')">Severe Pothole</button>
+                            <button class="preset-btn" onclick="loadPresetImage('crack1')">Asphalt Crack</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Scanner Simulation UI Container (hidden by default) -->
+                      <div class="scanner-preview-container hidden" id="scanner-preview-view">
+                        <div class="canvas-wrapper">
+                          <img id="scanner-src-img" src="" alt="Scanning Target">
+                          <canvas id="scanner-canvas"></canvas>
+                          <div class="laser-scanner-line" id="scanner-laser"></div>
+                        </div>
+                        <div class="scanner-status" id="scanner-status-text">
+                          <i class="fa-solid fa-spinner fa-spin text-cyan"></i> Running Neural Net Classification...
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Category and Details Form -->
+                    <div class="report-form-group hidden" id="report-metadata-form">
+                      <div class="form-row-custom">
+                        <div class="field-half">
+                          <label>Identified Class</label>
+                          <input type="text" id="detected-class-field" readonly class="highlight-input">
+                        </div>
+                        <div class="field-half">
+                          <label>Severity Score</label>
+                          <input type="text" id="detected-severity-field" readonly class="highlight-input">
+                        </div>
+                      </div>
+                      
+                      <div class="form-group-custom">
+                        <label>Category Label Override</label>
+                        <select id="reported-category">
+                          <option value="Pothole">Pothole</option>
+                          <option value="Waterlogging">Waterlogging</option>
+                          <option value="Broken Signal">Broken Signal</option>
+                          <option value="Road Crack">Road Crack</option>
+                          <option value="Missing Sign Board">Missing Sign Board</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group-custom">
+                        <label>Additional Description / Landmark</label>
+                        <input type="text" id="reported-landmark" placeholder="e.g. Near Metro Pillar 124">
+                      </div>
+
+                      <button class="submit-report-btn" id="submit-pothole-btn" onclick="submitRoadWatchReport()">
+                        <i class="fa-solid fa-location-arrow"></i> Dispatch Report to Gov Portal
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Government Transparency Dashboard Widget -->
+                  <div class="transparency-widget glass-card">
+                    <h4><i class="fa-solid fa-landmark"></i> Gov Accountability Portal</h4>
+                    <div class="transparency-metrics">
+                      <div class="t-metric">
+                        <span class="t-lbl">Total Road Spending (YTD)</span>
+                        <span class="t-val text-green">₹14.8 Crores</span>
+                      </div>
+                      <div class="t-metric">
+                        <span class="t-lbl">Average Authority Response</span>
+                        <span class="t-val text-amber">18.4 Hours</span>
+                      </div>
+                    </div>
+                    
+                    <div class="progress-tracker-box">
+                      <h5>Recent Report Tracking</h5>
+                      <ul class="progress-steps-list">
+                        <li class="step-item checked">
+                          <span class="step-icon"><i class="fa-solid fa-check"></i></span>
+                          <div class="step-details">
+                            <h6>Pothole #2094 Detected</h6>
+                            <span>Logged via SafeRoad AI (10m ago)</span>
+                          </div>
+                        </li>
+                        <li class="step-item checked">
+                          <span class="step-icon"><i class="fa-solid fa-check"></i></span>
+                          <div class="step-details">
+                            <h6>Assigned to GCC</h6>
+                            <span>Greater Chennai Corporation (8m ago)</span>
+                          </div>
+                        </li>
+                        <li class="step-item active">
+                          <span class="step-icon pulse-orange"></span>
+                          <div class="step-details">
+                            <h6>Dispatch Scheduled</h6>
+                            <span>Contractor assigned for road leveling</span>
+                          </div>
+                        </li>
+                        <li class="step-item future">
+                          <span class="step-icon"></span>
+                          <div class="step-details">
+                            <h6>Resolution Verified</h6>
+                            <span>Awaiting citizen visual approval</span>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- VIEW 4: ROADSOS (Emergency Rescue & Crash Simulator) -->
+              <div class="phone-view" id="view-roadsos">
+                <div class="view-header">
+                  <button class="back-to-home-btn" onclick="switchPhoneView('home')"><i class="fa-solid fa-arrow-left"></i></button>
+                  <h3>RoadSoS Emergency</h3>
+                  <span class="live-marker-dot red-glow"></span>
+                </div>
+
+                <div class="roadsos-scroll-area">
+                  
+                  <!-- Main SOS Siren Button Core -->
+                  <div class="sos-trigger-card glass-card">
+                    <div class="sos-ripple-container">
+                      <div class="sos-wave-circle wave-1"></div>
+                      <div class="sos-wave-circle wave-2"></div>
+                      <button class="sos-main-button" id="sos-pulse-trigger" onclick="triggerManualSOS()">
+                        <span>SOS</span>
+                        <small>HOLD TO SEND</small>
+                      </button>
+                    </div>
+                    <p class="sos-instructions">One-tap triggers high-priority alert to police, hospital networks, & 3 emergency contacts.</p>
+                  </div>
+
+                  <!-- ACCIDENT IMPACT SIMULATOR (Killer Hackathon Showcase) -->
+                  <div class="crash-simulator-box glass-card">
+                    <div class="box-tag">HACKATHON SHOWCASE</div>
+                    <div class="simulator-meta">
+                      <h4><i class="fa-solid fa-gauge-high"></i> Emergency Auto-Crash Detector</h4>
+                      <p>Simulates accelerometer telemetry showing an emergency vehicle impact/deceleration event.</p>
+                    </div>
+                    <button class="simulate-crash-btn" onclick="triggerAccidentSimulation()">
+                      <i class="fa-solid fa-burst"></i> Simulate Severe Crash Impact
+                    </button>
+                  </div>
+
+                  <!-- Hospital / Service tracking status (hidden unless SOS is active) -->
+                  <div class="rescue-dispatch-card glass-card hidden" id="rescue-dispatch-status">
+                    <div class="dispatch-header">
+                      <div class="status-badge pulse-red">SOS RESCUE DISPATCHED</div>
+                      <span class="eta-label">Ambulance ETA: <strong class="text-red" id="dispatch-eta">6 mins</strong></span>
+                    </div>
+                    
+                    <div class="hospital-routing-progress">
+                      <div class="dispatch-step complete">
+                        <span class="d-dot"></span>
+                        <span class="d-lbl">GPS Sent</span>
+                      </div>
+                      <div class="dispatch-step active">
+                        <span class="d-dot pulse-blue"></span>
+                        <span class="d-lbl">Ambulance En Route</span>
+                      </div>
+                      <div class="dispatch-step pending">
+                        <span class="d-dot"></span>
+                        <span class="d-lbl">Hospital Arrival</span>
+                      </div>
+                    </div>
+
+                    <div class="emergency-contact-notified">
+                      <i class="fa-solid fa-envelope-open-text text-amber"></i>
+                      <p>SMS Alert dispatched to Emergency Contacts: <strong>Mom, Brother</strong> with live map link.</p>
+                    </div>
+                  </div>
+
+                  <!-- Nearby Rescue Stations -->
+                  <div class="nearby-stations-list glass-card">
+                    <h4><i class="fa-solid fa-hospital"></i> Nearest Emergency Hubs</h4>
+                    <div class="station-item">
+                      <div class="station-icon hospital-symbol"><i class="fa-solid fa-square-h"></i></div>
+                      <div class="station-meta">
+                        <h5>Apollo Greams Road Hospital</h5>
+                        <p><i class="fa-solid fa-location-arrow"></i> 1.2 km away • Trauma Unit Level 1</p>
+                      </div>
+                      <a href="tel:102" class="call-station-btn"><i class="fa-solid fa-phone"></i></a>
+                    </div>
+                    
+                    <div class="station-item">
+                      <div class="station-icon police-symbol"><i class="fa-solid fa-building-shield"></i></div>
+                      <div class="station-meta">
+                        <h5>Nungambakkam Police Station</h5>
+                        <p><i class="fa-solid fa-location-arrow"></i> 0.8 km away • Active Squads</p>
+                      </div>
+                      <a href="tel:100" class="call-station-btn"><i class="fa-solid fa-phone"></i></a>
+                    </div>
+                  </div>
+
+                  <!-- Voice Activation Switch -->
+                  <div class="toggle-setting-card glass-card">
+                    <div class="setting-meta">
+                      <h4><i class="fa-solid fa-microphone-lines"></i> Hands-Free Voice Activation</h4>
+                      <p>Screaming "Help Help Help" triggers emergency dispatch automatically.</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="voice-sos-checkbox">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                </div>
+
+                <!-- Crash Alarm Countdown Screen Overlay (hidden by default) -->
+                <div class="crash-countdown-overlay hidden" id="crash-countdown-view">
+                  <div class="countdown-modal-box">
+                    <div class="impact-warning-header">
+                      <i class="fa-solid fa-circle-exclamation flash-red-icon"></i>
+                      <h2>IMPACT DETECTED!</h2>
+                      <span>Telemetry: 12.4G Deceleration Peak</span>
+                    </div>
+                    <p class="warning-alert-msg">SafeRoad AI detected a potential vehicle crash. Sending emergency distress coordinates in:</p>
+                    
+                    <div class="radial-timer-box">
+                      <svg viewBox="0 0 100 100" class="timer-svg">
+                        <circle cx="50" cy="50" r="45" class="timer-bg" />
+                        <circle cx="50" cy="50" r="45" class="timer-progress" id="timer-countdown-stroke" />
+                      </svg>
+                      <div class="timer-value" id="countdown-seconds-label">10</div>
+                    </div>
+
+                    <div class="countdown-actions">
+                      <button class="cancel-sos-btn" onclick="cancelAccidentTrigger()"><i class="fa-solid fa-circle-check"></i> I am OK - Cancel SOS</button>
+                      <button class="force-sos-btn" onclick="triggerManualSOS()"><i class="fa-solid fa-triangle-exclamation"></i> Send SOS Immediately</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- VIEW 5: MAP VIEWER -->
+              <div class="phone-view" id="view-map">
+                <div class="view-header">
+                  <h3>Live Safety Map</h3>
+                  <div class="map-controls">
+                    <button class="map-filter-badge active" id="map-filter-all" onclick="filterMapMarkers('all')">All</button>
+                    <button class="map-filter-badge" id="map-filter-potholes" onclick="filterMapMarkers('pothole')">Potholes</button>
+                    <button class="map-filter-badge" id="map-filter-accidents" onclick="filterMapMarkers('accident')">Risks</button>
+                  </div>
+                </div>
+                <!-- Interactive Leaflet map (full viewport) -->
+                <div id="citizen-main-map" class="citizen-fullscreen-map"></div>
+              </div>
+
+              <!-- VIEW 6: REPORTS LOGS -->
+              <div class="phone-view" id="view-reports">
+                <div class="view-header">
+                  <h3>Safety Reports log</h3>
+                </div>
+                <div class="reports-scroll-area">
+                  <div class="reports-header-stats">
+                    <p>Total reports submitted by you: <span id="user-total-reports-badge">0</span></p>
+                  </div>
+                  <!-- Reports Feed -->
+                  <div class="reports-list-feed" id="user-reports-feed-container">
+                    <!-- Placeholder when empty -->
+                    <div class="empty-feed-placeholder" id="empty-feed-placeholder">
+                      <i class="fa-solid fa-folder-open"></i>
+                      <p>You have not reported any issues yet. Submissions in RoadWatch will appear here.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- VIEW 7: PROFILE VIEW -->
+              <div class="phone-view" id="view-profile">
+                <div class="view-header">
+                  <h3>Citizen Safety profile</h3>
+                </div>
+                <div class="profile-scroll-area">
+                  <div class="profile-header-card glass-card">
+                    <div class="profile-avatar">
+                      <div class="avatar-ring"></div>
+                      <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h3 id="profile-user-name">dharun</h3>
+                    <span>SafeRoad Gold Member</span>
+                    <div class="reward-points-badge">
+                      <i class="fa-solid fa-award"></i> <span id="profile-reward-points">720</span> Safety Points
+                    </div>
+                  </div>
+
+                  <!-- Configuration cards -->
+                  <div class="profile-section-card glass-card">
+                    <h4>Emergency SOS Contacts</h4>
+                    <div class="emergency-contacts-setup">
+                      <div class="contact-row">
+                        <span class="contact-num">1.</span>
+                        <input type="text" value="Mom" readonly>
+                        <input type="text" value="+91 98765 43210" readonly>
+                      </div>
+                      <div class="contact-row">
+                        <span class="contact-num">2.</span>
+                        <input type="text" value="Brother" readonly>
+                        <input type="text" value="+91 99999 88888" readonly>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="profile-section-card glass-card">
+                    <h4>SafeRoad AI Tech Stack</h4>
+                    <div class="tech-stack-items">
+                      <span class="tech-badge"><i class="fa-brands fa-react text-cyan"></i> HTML5/CSS3/JS</span>
+                      <span class="tech-badge"><i class="fa-solid fa-map-location-dot text-green"></i> Leaflet Maps</span>
+                      <span class="tech-badge"><i class="fa-solid fa-server text-orange"></i> Express & MongoDB</span>
+                      <span class="tech-badge"><i class="fa-solid fa-brain text-purple"></i> Gemini AI Model</span>
+                      <span class="tech-badge"><i class="fa-solid fa-eye text-amber"></i> Roboflow Vision API</span>
+                      <span class="tech-badge"><i class="fa-solid fa-chart-line text-blue"></i> Chart.js Analytics</span>
+                    </div>
+                  </div>
+
+                  <!-- Logout Button -->
+                  <button class="logout-btn" onclick="handleCitizenLogout()" style="width: 100%; margin-top: 15px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fda4af; padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-family: var(--font-main); transition: all 0.3s; margin-bottom: 20px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Log Out Account
+                  </button>
+
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bottom Navigation Bar (Citizen App) -->
+            <nav class="phone-navbar" id="phone-navbar" style="display: none;">
+              <button class="nav-item active-nav" id="nav-home" onclick="switchPhoneView('home')">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+              </button>
+              <button class="nav-item" id="nav-map" onclick="switchPhoneView('map')">
+                <i class="fa-solid fa-map"></i>
+                <span>Map</span>
+              </button>
+              <button class="nav-item" id="nav-reports" onclick="switchPhoneView('reports')">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Reports</span>
+              </button>
+              <button class="nav-item" id="nav-sos" onclick="switchPhoneView('roadsos')">
+                <div class="sos-nav-bubble"><i class="fa-solid fa-kit-medical"></i></div>
+                <span>SOS</span>
+              </button>
+              <button class="nav-item" id="nav-profile" onclick="switchPhoneView('profile')">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+              </button>
+            </nav>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT PANE: Government/Admin Dashboard (Control Room) -->
+      <section class="right-pane" id="admin-dashboard-pane">
+        
+        <!-- Admin Dashboard Auth Overlay -->
+        <div id="admin-auth-overlay" class="admin-auth-overlay">
+          <div class="admin-auth-card glass-card">
+            <div class="auth-header">
+              <div class="auth-logo admin-logo"><i class="fa-solid fa-circle-nodes text-cyan"></i></div>
+              <h3>SMART CIVIC CONTROL ROOM</h3>
+              <span>Government Admin Credentials Required</span>
+            </div>
+            <div class="auth-form">
+              <div class="auth-input-group">
+                <i class="fa-solid fa-user-shield"></i>
+                <input type="text" id="admin-username" placeholder="Admin Username (e.g. admin)">
+              </div>
+              <div class="auth-input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="admin-password" placeholder="Admin Password (e.g. admin)">
+              </div>
+              <button class="auth-submit-btn admin-submit-btn" onclick="handleAdminLogin()">
+                <i class="fa-solid fa-unlock-keyhole"></i> Authenticate Console
+              </button>
+              <div class="demo-login-box admin-demo-box">
+                <span>Fast Demo Login:</span>
+                <button class="demo-chip admin-chip" onclick="quickFillAdmin('admin', 'admin')">admin / admin</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-panel glass-card" id="admin-main-panel" style="display: none;">
+          
+          <!-- Admin Dashboard Header -->
+          <div class="admin-header">
+            <div class="admin-title">
+              <h2><i class="fa-solid fa-circle-nodes"></i> SMART CIVIC CONTROL ROOM</h2>
+              <span>Government of Tamil Nadu • Road Infrastructure & Accident Prevention Console</span>
+            </div>
+            <div class="admin-controls">
+              <button class="admin-btn active-admin-btn" onclick="toggleMapHeatmap(true)">
+                <i class="fa-solid fa-fire-flame-curved"></i> Show Risk Heatmap
+              </button>
+              <button class="admin-btn" onclick="toggleMapHeatmap(false)">
+                <i class="fa-solid fa-circle-dot"></i> Show Standard Pins
+              </button>
+              <button class="admin-btn logout-admin-btn" onclick="handleAdminLogout()" style="margin-left: 10px; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #fda4af;">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+              </button>
+            </div>
+          </div>
+
+          <!-- Top Row Statistics Widgets -->
+          <div class="admin-stats-bar">
+            
+            <div class="admin-stat-widget">
+              <div class="stat-icon red-glow"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="stat-info">
+                <span class="stat-lbl">Active Hazards Logged</span>
+                <span class="stat-val" id="admin-total-hazards">1,482</span>
+                <span class="stat-trend text-red"><i class="fa-solid fa-arrow-trend-up"></i> +4.2% This Week</span>
+              </div>
+            </div>
+
+            <div class="admin-stat-widget">
+              <div class="stat-icon yellow-glow"><i class="fa-solid fa-hourglass-half"></i></div>
+              <div class="stat-info">
+                <span class="stat-lbl">Mean Resolution Time</span>
+                <span class="stat-val">12.4 Hours</span>
+                <span class="stat-trend text-green"><i class="fa-solid fa-arrow-trend-down"></i> -1.8h AI Directed</span>
+              </div>
+            </div>
+
+            <div class="admin-stat-widget">
+              <div class="stat-icon green-glow"><i class="fa-solid fa-road-circle-check"></i></div>
+              <div class="stat-info">
+                <span class="stat-lbl">Resolved Road Length</span>
+                <span class="stat-val">342.8 km</span>
+                <span class="stat-trend text-green"><i class="fa-solid fa-arrow-trend-up"></i> +12% target</span>
+              </div>
+            </div>
+
+            <div class="admin-stat-widget">
+              <div class="stat-icon pulse-red"><i class="fa-solid fa-truck-medical"></i></div>
+              <div class="stat-info">
+                <span class="stat-lbl">Active SOS Distress Alerts</span>
+                <span class="stat-val text-red" id="admin-active-sos-count">0</span>
+                <span class="stat-trend">Ready Dispatchers</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Mid Section: Large Map & Analytics Charts -->
+          <div class="admin-mid-section">
+            
+            <!-- Map Container -->
+            <div class="admin-map-panel glass-card">
+              <div class="panel-header">
+                <h4><i class="fa-solid fa-map-location-dot"></i> Live Hazard Map & Accident Hotspots</h4>
+                <div class="live-pulse-indicator">
+                  <span class="pulse-dot"></span> LIVE TELEMETRY
+                </div>
+              </div>
+              <!-- Large Interactive Map -->
+              <div id="admin-leaflet-map" style="height: 380px; width: 100%; border-radius: 8px;"></div>
+            </div>
+
+            <!-- Charts Column -->
+            <div class="admin-charts-panel">
+              <div class="glass-card chart-container-card">
+                <h4><i class="fa-solid fa-chart-line"></i> AI Accident Risk & Road Defect Prediction</h4>
+                <div class="chart-canvas-wrapper">
+                  <canvas id="risk-trend-chart"></canvas>
+                </div>
+              </div>
+              <div class="glass-card chart-container-card">
+                <h4><i class="fa-solid fa-chart-pie"></i> Hazard Categories Breakdown</h4>
+                <div class="chart-canvas-wrapper">
+                  <canvas id="category-distribution-chart"></canvas>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Section: Citizen Incident Submissions Log Table -->
+          <div class="admin-bottom-section glass-card">
+            <div class="panel-header">
+              <h4><i class="fa-solid fa-table-list"></i> Real-time Incident Feed & Dispatch Controls</h4>
+              <span class="admin-refresh-timestamp">Last synced: <span id="admin-sync-time">Just now</span></span>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="admin-feed-table">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Visual Input</th>
+                    <th>Classification</th>
+                    <th>Severity Score</th>
+                    <th>Coordinates</th>
+                    <th>Reported Landmark</th>
+                    <th>Status</th>
+                    <th>Action Center</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-reports-table-body">
+                  <!-- Synced dynamically in app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Sound triggers for alerts -->
+  <audio id="siren-sound-audio" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" loop></audio>
+
+  <!-- Custom Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

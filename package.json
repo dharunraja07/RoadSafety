@@ -1,0 +1,21 @@
+{
+  "name": "safe-road-ai",
+  "version": "1.0.0",
+  "description": "SafeRoad AI - Smart Road Safety Ecosystem",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.2"
+  }
+}
