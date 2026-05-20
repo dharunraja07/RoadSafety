@@ -943,29 +943,6 @@ function assignReportAdmin(reportId) {
   }
 }
 
-function resolveReportAdmin(reportId) {
-  const r = db.reports.find(item => item.id === reportId);
-  if (r) {
-    r.status = "resolved";
-    // If it was a critical SOS crash, reset active SOS count
-    if (r.type === "Critical Crash") {
-      document.getElementById("admin-active-sos-count").innerText = "0";
-      document.getElementById("admin-active-sos-count").classList.remove("pulse-red");
-      db.activeSos = false;
-      // Hide active dispatch status box inside SOS panel
-      document.getElementById("rescue-dispatch-status").classList.add("hidden");
-    }
-    
-    // Add reward points for Citizen
-    db.userScore = Math.min(db.userScore + 5, 100);
-    setHomeSafetyGauge(db.userScore);
-
-    renderReports();
-    syncMapMarkers();
-    updateChartData();
-  }
-}
-
 // --------------------------------------------------------------------------
 // 9. Admin Analytics Config (Chart.js Engine)
 // --------------------------------------------------------------------------
@@ -1374,3 +1351,34 @@ async function resolveReportAdmin(reportId) {
     updateChartData();
   }
 }
+
+// --------------------------------------------------------------------------
+// 12. Global Window Exports for Inline HTML Handlers
+// --------------------------------------------------------------------------
+window.quickFillCitizen = quickFillCitizen;
+window.quickFillAdmin = quickFillAdmin;
+window.toggleCitizenAuthMode = toggleCitizenAuthMode;
+window.handleCitizenLogin = handleCitizenLogin;
+window.handleCitizenRegister = handleCitizenRegister;
+window.unlockCitizenApp = unlockCitizenApp;
+window.handleCitizenLogout = handleCitizenLogout;
+window.handleAdminLogin = handleAdminLogin;
+window.unlockAdminConsole = unlockAdminConsole;
+window.handleAdminLogout = handleAdminLogout;
+window.requestLiveLocation = requestLiveLocation;
+window.fetchRealWeather = fetchRealWeather;
+window.resolveReportAdmin = resolveReportAdmin;
+window.assignReportAdmin = assignReportAdmin;
+window.switchPhoneView = switchPhoneView;
+window.toggleMapHeatmap = toggleMapHeatmap;
+window.filterMapMarkers = filterMapMarkers;
+window.handleChatInputSubmit = handleChatInputSubmit;
+window.sendSuggestedChat = sendSuggestedChat;
+window.toggleVoiceSimulation = toggleVoiceSimulation;
+window.toggleFineCalcCollapse = toggleFineCalcCollapse;
+window.updateCalcPreview = updateCalcPreview;
+window.loadPresetImage = loadPresetImage;
+window.submitRoadWatchReport = submitRoadWatchReport;
+window.triggerAccidentSimulation = triggerAccidentSimulation;
+window.cancelAccidentTrigger = cancelAccidentTrigger;
+window.triggerManualSOS = triggerManualSOS;
